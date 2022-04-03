@@ -1,101 +1,133 @@
 <script>
   import { onMount } from "svelte";
+  import InfiniteScroll from "svelte-infinite-scroll";
 
-  onMount(async function() {
-    const response = await fetch("https://www.smwcentral.net/?p=section&s=smwhacks");
 
-    const data = await response.text();
+  let page = 0;
+  const pageSize = 32;
 
-    console.log(data);
+
+  let allHacks = [];
+
+  onMount(async () => {
+    const response = await fetch("https://raw.githubusercontent.com/NNBnh/smwc-api/main/smw.json");
+    allHacks = await response.json();
   });
 
-  const hacks = [
-    { id: 18238, name: "Invictus", demo: true, featured: true, length: 100, types: [0], authors: ["juzcook"], rating: 4.9, downloads: 225521, preview: "https://dl.smwcentral.net/image/53596.png" },
-    { id: 18239, name: "Invictus", demo: false, featured: true, length: 22, types: [1], authors: ["juzcook"], rating: 5.0, downloads: 25521, preview: "https://dl.smwcentral.net/image/53596.png" },
-    { id: 18240, name: "Invictus", demo: false, featured: false, length: 22, types: [2], authors: ["juzcook"], rating: 5.0, downloads: 25521, preview: "https://dl.smwcentral.net/image/53596.png" },
-    { id: 18241, name: "Invictus", demo: false, featured: false, length: 22, types: [3, 4], authors: ["juzcook"], rating: 5.0, downloads: 25521, preview: "https://dl.smwcentral.net/image/53596.png" },
-    { id: 18242, name: "Invictus", demo: false, featured: false, length: 22, types: [4], authors: ["juzcook"], rating: 5.0, downloads: 25521, preview: "https://dl.smwcentral.net/image/53596.png" },
-    { id: 18243, name: "Invictus", demo: false, featured: false, length: 22, types: [5], authors: ["juzcook"], rating: 5.0, downloads: 25521, preview: "https://dl.smwcentral.net/image/53596.png" },
-    { id: 18244, name: "Invictus", demo: false, featured: false, length: 22, types: [6], authors: ["juzcook"], rating: 5.0, downloads: 25521, preview: "https://dl.smwcentral.net/image/53596.png" },
-    { id: 18245, name: "Invictus", demo: false, featured: false, length: 22, types: [7], authors: ["juzcook"], rating: 5.0, downloads: 25521, preview: "https://dl.smwcentral.net/image/53596.png" }
-  ];
+
+  let hacks = [];
+  let newBatch = [];
+
+  $: {
+    newBatch = allHacks.splice(pageSize * page, pageSize * (page + 1));
+    hacks = [ ...hacks, ...newBatch ];
+  }
 </script>
+
+<style>
+  .spinner {
+    margin: 100px auto 0;
+    width: 70px;
+    text-align: center;
+  }
+
+  .spinner > div {
+    width: 18px;
+    height: 18px;
+    background-color: white;
+
+    border-radius: 100%;
+    display: inline-block;
+    animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+  }
+
+  .spinner .bounce1 {
+    animation-delay: -0.32s;
+  }
+
+  .spinner .bounce2 {
+    animation-delay: -0.16s;
+  }
+
+  @keyframes sk-bouncedelay {
+    0%, 80%, 100% {
+      transform: scale(0);
+    } 40% {
+      transform: scale(1.0);
+    }
+  }
+</style>
 
 <section class="text-gray-400 bg-gray-900 body-font">
   <div class="container px-5 py-24 mx-auto">
-    <div class="flex flex-wrap justify-center -m-4">
-      {#each hacks as hack (hack.id)}
-        <div class="p-4 md:w-1/3 lg:w-1/4">
-          <div class="h-full bg-gray-800 hover:bg-gray-700 duration-200 overflow-hidden rounded-lg drop-shadow-md hover:scale-105 relative">
-            <img class="w-full object-cover object-center [image-rendering:pixelated]" src={hack.preview} alt="Preview">
+    <div class="flex flex-wrap justify-center">
+      {#each hacks as hack, hackIndex (hack.id)}
+        <div class="p-4 w-full sm:w-1/2 md:w-1/3 lg:w-1/4">
+          <a class="block h-full bg-gray-800 hover:bg-gray-700 duration-200 overflow-hidden rounded-lg drop-shadow-md hover:scale-105 relative" href="https://www.smwcentral.net/?p=section&a=details&id={hack.id}" target="_blank">
+            <img class="w-full object-cover object-center [image-rendering:pixelated]" src={hack.screenshot} alt="Preview">
 
             <div class="p-4 flex flex-col">
               <h1 class="title-font text-lg font-bold text-white">{hack.name}</h1>
 
-              <h2 class="mb-3 tracking-widest text-xs title-font font-medium">
-                {#if hack.demo && hack.featured}
-                  Featured Demo
-                {:else if hack.featured}
-                  Demo
-                {:else if hack.featured}
-                  Featured
-                {/if}
-              </h2>
+              <div class="mb-2 tracking-widest text-xs title-font font-bold">
+                {#if hack.demo    } <h2 class="my-0.5"> Demo     </h2> {/if}
+                {#if hack.featured} <h2 class="my-0.5"> Featured </h2> {/if}
 
-              <p class="text-xs title-font font-semibold">
                 {#each hack.types as type}
-                  {#if      type === 0} <spam class="mr-2 px-2   py-1 rounded-full  text-green-900  bg-green-500">Easy</spam>
-                  {:else if type === 1} <spam class="mr-2 px-2   py-1 rounded-full  text-amber-900  bg-amber-500">Normal</spam>
-                  {:else if type === 2} <spam class="mr-2 px-2   py-1 rounded-full text-orange-900 bg-orange-500">Hard</spam>
-                  {:else if type === 3} <spam class="mr-2 px-2   py-1 rounded-full    text-red-900    bg-red-500">Very Hard</spam>
+                  {#if      type === 0} <h2 class="my-0.5  text-green-400"> Standard: Easy       </h2>
+                  {:else if type === 1} <h2 class="my-0.5  text-amber-400"> Standard: Normal     </h2>
+                  {:else if type === 2} <h2 class="my-0.5 text-orange-400"> Standard: Hard       </h2>
+                  {:else if type === 3} <h2 class="my-0.5    text-red-400"> Standard: Very Hard  </h2>
 
-                  {:else if type === 4} <spam class="mr-2 px-1.5 py-1 rounded-sm      text-sky-900    bg-sky-400">Beginner</spam>
-                  {:else if type === 5} <spam class="mr-2 px-1.5 py-1 rounded-sm   text-violet-900 bg-violet-400">Intermediate</spam>
-                  {:else if type === 6} <spam class="mr-2 px-1.5 py-1 rounded-sm     text-pink-900   bg-pink-400">Expert</spam>
+                  {:else if type === 4} <h2 class="my-0.5    text-sky-400"> Kaizo: Beginner      </h2>
+                  {:else if type === 5} <h2 class="my-0.5 text-violet-400"> Kaizo: Intermediate  </h2>
+                  {:else if type === 6} <h2 class="my-0.5   text-pink-400"> Kaizo: Expert        </h2>
 
-                  {:else if type === 7} <spam class="mr-2 px-1.5 py-1 rounded-sm     text-gray-900   bg-gray-500">TAS</spam>
-                  {:else if type === 8} <spam class="mr-2 px-1.5 py-1 rounded-sm     text-gray-900   bg-gray-500">Pit</spam>
-                  {:else if type === 9} <spam class="mr-2 px-1.5 py-1 rounded-sm     text-gray-900   bg-gray-500">Troll</spam>
+                  {:else if type === 7} <h2 class="my-0.5   text-gray-400"> Tool-Assisted: Kaizo </h2>
+                  {:else if type === 8} <h2 class="my-0.5   text-gray-400"> Tool-Assisted: Pit   </h2>
+                  {:else if type === 9} <h2 class="my-0.5   text-gray-400"> Misc.: Troll         </h2>
                   {/if}
                 {/each}
-              </p>
+              </div>
 
-              <p class="mt-6 mb-12 inline-flex leading-none">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-1">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-                {hack.authors}
+              <p class="mb-12 inline-flex flex-wrap text-sm">
+                By&nbsp;
+                {#each hack.authors as author, authorIndex (author.id)}
+                  <a class="font-bold hover:underline" style={author.style} href="https://www.smwcentral.net/?p=profile&id={author.id}" target="_blank">{author.name}</a>
+                  {#if authorIndex !== hack.authors.length - 1},&nbsp;{/if}
+                {/each}
               </p>
             </div>
 
-            <div class="absolute bottom-6 left-0 right-0 flex justify-center text-sm text-gray-500">
-              <span class="inline-flex mx-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-1">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
+            <div class="absolute bottom-6 left-0 right-0 flex justify-center text-ms text-gray-500">
+              <span class="inline-flex items-center mx-1.5">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
                 {hack.downloads}
               </span>
 
-              <span class="inline-flex mx-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-1">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
+              <span class="inline-flex items-center mx-1.5">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                 {hack.rating}
               </span>
 
-              <span class="inline-flex mx-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-1">
-                  <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
-                </svg>
+              <span class="inline-flex items-center mx-1.5">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" clip-rule="evenodd"></path></svg>
                 {hack.length}
               </span>
             </div>
-          </div>
+          </a>
         </div>
       {/each}
+
+      <InfiniteScroll hasMore={newBatch.length} window={true} on:loadMore={() => page++} />
     </div>
+
+    {#if newBatch.length}
+      <div class="spinner">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+      </div>
+    {/if}
   </div>
 </section>
