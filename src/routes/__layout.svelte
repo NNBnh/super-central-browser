@@ -1,5 +1,6 @@
 <script>
 	import '../app.css';
+	export const prerender = true;
 	import { base } from '$app/paths';
 
 	const title = `
