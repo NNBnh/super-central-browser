@@ -11,7 +11,7 @@
 
 <header class="text-gray-400 bg-sky-500 drop-shadow-md body-font">
   <div class="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-    <a class="flex title-font font-medium items-center text-xl text-white mb-4 md:mb-0" href="/">
+    <a class="flex title-font font-medium items-center text-xl text-white mb-4 md:mb-0" href="/super-central-browser">
       {@html title}
     </a>
     <!-- TODO -->
@@ -22,11 +22,11 @@
 
 <footer class="text-gray-400 bg-gray-900 body-font">
   <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
-    <a class="ml-3 flex title-font font-medium items-center md:justify-start justify-center text-xl text-white">
+    <p class="ml-3 flex title-font font-medium items-center md:justify-start justify-center text-xl text-grey">
       {@html title}
-    </a>
+    </p>
     <p class="text-sm text-gray-400 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-gray-800 sm:py-2 sm:mt-0 mt-4">
-      <a href="https://NNBnh.github.io" class="text-gray-500 ml-1" target="_blank" rel="noopener noreferrer">NNB</a>
+      <a class="text-gray-500 ml-1" href="https://NNBnh.github.io" target="_blank">NNB</a>
       &#169; 2022-{year}
     </p>
   </div>
